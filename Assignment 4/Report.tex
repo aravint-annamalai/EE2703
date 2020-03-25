@@ -1,0 +1,114 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{listings}
+
+\title{Assignment 4 - Fourier Approximations}
+
+\author{Aravint Annamalai, EE18B125}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Abstract}
+In this assignment, I am going to deal with Fourier approximations of a periodic signal. According to this, any periodic signal can be represented as a linear combination of sines and cosines.  I am going to analyse the Fourier representation of two signals: exp(x), which is not periodic, and cos(cos(x)), which is periodic. The analysis is done over a period from 0 to 2$\pi$. The computed Fourier coefficients is compared with the values obtained by the least square error approximation. The approximated functions are then compared with the actual function.
+
+\section{Introduction}
+ Every periodic function can be written with the help of Fourier approximation in this form:
+\begin{equation}\label{eq:1}
+f(x)=a_0+ \sum_{k=1}^{n}(a_n  \cos nx+b_n  \sin nx)
+\end{equation}
+where the coefficients can be computed by
+\begin{equation} \label{eq1}
+\begin{split}
+a_0 &=\frac{1}{2\pi} \int_0^{2\pi} f(x)dx 
+\\a_n &=\frac{1}{\pi} \int_0^{2\pi} f(x)\cos (nx)dx 
+\\b_n &=\frac{1}{\pi} \int_0^{2\pi} f(x)\sin (nx)dx
+\end{split}
+\end{equation}
+There is a built-in function \texttt{scipy.integrate.quad()} which computes the integral of any function within the specified limits, all passed as arguments. If the function to be integrated also requires some parameters to be passed, that can also be done as we will see here.
+
+\section{Task 1}
+Here, we define the functions \texttt{exp(x)} and \texttt{cos(cos(x))} for values ranging from -2$\pi$ to 4$\pi$, make them 2$\pi$ periodic and plot all the graphs. 
+
+\subsection{Defining the functions}
+Firstly the libraries \texttt{numpy} and \texttt{matplotlib.pyplot} are imported for performing array related operations and graphing respectively.\\
+Here, we will define 2 functions \texttt{exponential(x)} and \texttt{coscos(x)} which returns exp() and cos(cos()) values of the value/array passed to it as arguments. We use the built-in functions \texttt{np.exp()} and \texttt{np.cos()} to perform our required task.
+
+\subsection{Plotting graphs from -2$\pi$ to 4$\pi$} 
+The constant pi is declared and is given the approximate value of 3.1416. A list x is declared which stores 300 samples between -2$\pi$ to 4$\pi$. \texttt{np.linspace()} is used for the purpose. Using \texttt{np.vectorize()} method, the above two functions defined are made to return lists/arrays when the argument passed is having that data type. The new functions are \texttt{exp1(x)} and \texttt{coscos1(x)}. \\ \\
+Then the graphs of these functions are plotted. Since \texttt{exp(x)} grows really fast, without any bounds, it is plotted as a semilog graph whereas the graph of \texttt{cos(cos(x))} is plotted using regular scale. Legends are given to the graphs appropriately.
+
+\subsection{Plotting 2$\pi$ periodic functions}
+Using \texttt{np.linspace()} method, a list containing 400 samples between 0 and  2$\pi$ is declared. The above functions \texttt{exp1(x)} and \texttt{coscos1(x)} are used to assign the respective function values to separate lists. These functions are then plotted from  -2$\pi$ to 4$\pi$ by appropriately shifting the values on the x-axis. The resultat graphs are such that the functions are 2$\pi$ periodic . 
+
+\section{Task 2}
+Here, we are going to compute the first 51 Fourier series coefficients of the two functions \texttt{exp(x)} and \texttt{cos(cos(x))}.
+
+\subsection{Defining the functions to be integrated}
+We define two functions \texttt{u()} and \texttt{v()} as follows:
+\begin{verbatim}
+def u(x, func, k):
+    u1 = func(x) * np.cos(k*x)
+    return u1
+
+def v(x, func, k):
+    v1 = func(x) * np.sin(k*x)
+    return v1
+\end{verbatim}
+As we can see in (2) above, these are the functions to be integrated to compute the Fourier series coefficients.
+
+\subsection{Computing Fourier series coefficients}
+In order to perform the integrals, the function \texttt{scipy.integrate.quad()} is imported. Lists to store the Fourier series coefficients are declared and initialised with null values. Then, the integrals in  (2) are computed and stored in the respective arrays. The technique for computation is depicted as an example below:
+\begin{verbatim}
+ a_exp[i] = (1/pi) * quad(u, 0, (2*pi), args = (exp1,i))[0]
+\end{verbatim}
+Like the above example, the lists declared in order to store the coefficients are populated.
+
+\section{Task 3}
+Here, I am combining the Fourier series coefficients commputed in the previous task into a single list for each function and I am plotting them in various scales.
+
+\subsection{Storing the Fourier series coefficients}
+First I am going to store the values of the coefficients of \texttt{exp(x)} into a single list. For that, I have declared a list \texttt{pred.exp} of size 51, initially storing null values. The first element of this list is assigned as the first value of the \texttt{a.exp} list computed in the previous task. Then, the subsequent elements are asiigned to subsequent elements of \texttt{a.exp} and \texttt{b.exp} values in that order. All the values in this list are made positive in order to plot the graphs when the scale on the y-axis will be log scale. The same process is repeated for the coefficients for \texttt{cos(cos(x))} as well.
+
+\subsection{Plotting the Fourier series coefficients}
+I am plotting a scatter plot of the coefficients vs the number assigned to the coefficient, as was assigned to them in the previous subsection. First, the graph is plotted in the loglog scale and then the graph between the same quantities are plotted in the semilogy scale as well. These graphs are given appropriate titles and are displayed. This is done for both the functions.
+
+\subsection{Answers to the questions}
+\textbf{(a) If you did Q1 correctly, the b\textsubscript{n} coefficients in the second case should be nearly zero. Why does this happen?}
+\\Since the function in the second case is \texttt{cos(cos(x))}, there is no sine harmonic in there, so the contribution from the sine part of Fourier coefficients, represented by b\textsubscript{n}, are close to zero.
+
+\textbf{(b) In the first case, the coefficients do not decay as quickly as the coefficients for the second case. Why not?}
+\\The function in the second case is a cosine, and since Fouier series coefficients are computed in terms of cosines, there exists only a very few harmonics in the second case and the value of coefficients decay faster. 
+
+\section{Tasks 4 and 5}
+Here, I am going to construct matrices so that Fourier coefficients could be computed using the least square error method \texttt{numpy.linalg.lstsq()}. The computed values are then compared with the values of the coefiicients obtained using the integrals done in Task 2.
+
+\subsection{Populating the matrices}
+A list x is declared which stores 400 samples between 0 and  2$\pi$. A list \texttt{b.exp} is initialised with the list returned after x is passed to the function \texttt{exp1(x)}. A matrix \texttt{A} of order 400*51 is declared and is initialised with zeros. The first column of A is assigned identically 1, and the remining columns are assigned as follows:
+\begin{verbatim}
+for k in range(1,26):
+    A[:, (2*k -1)] = np.cos(k*x)
+    A[:, (2*k)] = np.sin(k*x)
+\end{verbatim}
+
+\subsection{Estimating the coefficients and plotting them}
+The coefficients are estimated using the function \texttt{numpy.linalg.lstsq()}, by passing the matrices \texttt{A} and \texttt{b.exp} as parameters. The elements of the returned list \texttt{lstsq.exp} is then made positive for graphing, which may involve log scaling. Both the list of coefficients, one obtained by doing direct integration (\texttt{pred.exp}) and the other, obtained by the least square error minimisation {\texttt{lstsq.exp}). These are plotted as scatter plots and are plotted using different colours for ease of identification. The same process is repeated for the other function as well.
+
+\section{Task 6}
+In this task, the maximum error between \texttt{lstsq.exp} and \texttt{pred.exp} is computed using list comprehension and \texttt{max()} method. This process is repeated for \texttt{cos(cos(x))} as well. 
+\begin{verbatim}
+err_exp = [abs(lstsq_exp[i] - pred_exp[i]) for i in range(51)]
+print(max(err_exp))
+\end{verbatim}
+
+\section{Task 7}
+The actual value of the function can be obtained by multiplying the A matrix declared in Task 4 with the solution matrix. The multiplication is done using the in-built matrix multiplication method. The value obtained after using the solution matrix from the least square error method and the actual function valus computed in Task 1. This process is done for both the functions.
+
+\section{Observation}
+Here, it can be seen that for periodic functions(like \texttt{cos(cos(x))} which was done in this assignment), the Fourier representation gives an exact value for each point within the domain which was used for performing the Fourier analysis. Whereas, for non-periodic functions like \texttt{exp(x)}, the Fourier analysis does not provide an exact graph as the function itself, but provides a good enough approximation within the domain which was used to perform the Fourier analysis.
+
+\end{document}
